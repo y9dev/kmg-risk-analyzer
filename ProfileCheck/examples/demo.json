@@ -1,0 +1,15 @@
+{
+  "domain": {"dn": "DC=demo,DC=local", "name": "demo.local", "minimum_password_length": 8, "password_complexity_enabled": false},
+  "groups": [
+    {"dn": "CN=Domain Admins,DC=demo,DC=local", "name": "Domain Admins", "members": ["CN=Ops,DC=demo,DC=local", "CN=svc-backup,DC=demo,DC=local"]},
+    {"dn": "CN=Backup Operators,DC=demo,DC=local", "name": "Backup Operators", "members": ["CN=svc-backup,DC=demo,DC=local"]},
+    {"dn": "CN=Ops,DC=demo,DC=local", "name": "Ops", "members": ["CN=alice,DC=demo,DC=local"]}
+  ],
+  "users": [
+    {"dn": "CN=alice,DC=demo,DC=local", "name": "alice", "enabled": true, "service": false, "created": "2023-01-01T00:00:00Z", "last_logon": "2024-01-01T00:00:00Z", "password_last_set": "2023-01-01T00:00:00Z", "password_never_expires": true},
+    {"dn": "CN=svc-backup,DC=demo,DC=local", "name": "svc-backup", "enabled": true, "service": true, "created": "2022-01-01T00:00:00Z", "last_logon": "2025-01-01T00:00:00Z", "password_last_set": "2023-01-01T00:00:00Z", "password_never_expires": true, "interactive_login_allowed": true, "owner": null},
+    {"dn": "CN=bob,DC=demo,DC=local", "name": "bob", "enabled": false, "service": false, "created": "2021-01-01T00:00:00Z", "last_logon": "2022-01-01T00:00:00Z", "password_last_set": "2021-01-01T00:00:00Z", "expires": "2024-01-01T00:00:00Z"}
+  ],
+  "computers": [{"dn": "CN=OLD-PC,DC=demo,DC=local", "name": "OLD-PC", "enabled": true, "last_logon": "2023-01-01T00:00:00Z"}],
+  "failed_logons": []
+}
