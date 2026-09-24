@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS findings;
+DROP TABLE IF EXISTS certificates;
+DROP TABLE IF EXISTS scans;
+DROP TABLE IF EXISTS targets;
