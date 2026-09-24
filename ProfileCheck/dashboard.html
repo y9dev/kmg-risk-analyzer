@@ -30,7 +30,7 @@
   <header class="top">
     <div><h1>Identity Risk Analyzer</h1><p>Проверка учётных записей и привилегий Active Directory</p></div>
     <div class="actions">
-      <select id="source" aria-label="Источник данных"><option value="demo">Демо данные</option><option value="ldap">Тестовый AD (LDAPS)</option></select>
+      <select id="source" aria-label="Источник данных"><option value="ldap">Active Directory</option><option value="demo">Демо данные</option></select>
       <button id="scan">Запустить анализ</button>
       <a class="export" id="export" href="/api/v1/export.csv" hidden>Скачать CSV</a>
     </div>
@@ -43,8 +43,18 @@
   <script>
     const $ = id => document.getElementById(id);
     const labels = [['security_score','AD Security Score'],['Critical','Critical'],['High','High'],['Medium','Medium'],['Low','Low'],['accounts','Всего аккаунтов'],['privileged_accounts','Привилегированных']];
+    async function api(path, options) {
+      if (location.protocol !== 'http:' || !['127.0.0.1', 'localhost'].includes(location.hostname)) {
+        throw new Error('Открой страницу через http://127.0.0.1:8000/ после запуска python run.py. Не открывай dashboard.html как файл.');
+      }
+      try {
+        return await fetch(path, options);
+      } catch (error) {
+        throw new Error(`Нет связи с сервером на ${location.origin}. Проверь, что python run.py всё ещё запущен, и обнови страницу.`);
+      }
+    }
     async function load() {
-      const response = await fetch('/api/v1/report');
+      const response = await api('/api/v1/report');
       if (response.status === 404) { $('status').textContent = 'Пока нет результатов. Нажми «Запустить анализ».'; return; }
       if (!response.ok) throw new Error('Не удалось загрузить отчёт');
       const report = await response.json();
@@ -75,7 +85,7 @@
     $('scan').addEventListener('click', async () => {
       $('scan').disabled = true; $('status').textContent = 'Проверка выполняется...';
       try {
-        const response = await fetch('/api/v1/scans', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({source:$('source').value})});
+        const response = await api('/api/v1/scans', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({source:$('source').value})});
         if (!response.ok) { const result = await response.json(); throw new Error(result.error || 'Ошибка анализа'); }
         await load();
       } catch (error) { $('status').textContent = error.message; }

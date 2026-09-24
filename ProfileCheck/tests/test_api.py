@@ -3,6 +3,7 @@ import threading
 import unittest
 from http.server import ThreadingHTTPServer
 from urllib.request import Request, urlopen
+from urllib.error import HTTPError
 
 from radar.api import Handler, STATE
 
@@ -41,6 +42,11 @@ class APITests(unittest.TestCase):
             self.assertEqual(response.headers.get_content_type(), "text/csv")
             self.assertTrue(response.read().startswith(b"\xef\xbb\xbf"))
         self.assertIsNotNone(STATE["report"])
+
+    def test_scan_request_rejects_user_data(self):
+        with self.assertRaises(HTTPError) as caught:
+            self.request("/api/v1/scans", {"users": [{"name": "injected"}]})
+        self.assertEqual(caught.exception.code, 400)
 
 
 if __name__ == "__main__":

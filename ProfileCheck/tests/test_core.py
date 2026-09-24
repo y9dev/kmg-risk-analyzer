@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from radar.core import analyze, validate_thresholds
-from radar.sources import reject_secrets
+from radar.sources import _filetime, reject_secrets
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -45,6 +45,10 @@ class AnalyzerTests(unittest.TestCase):
     def test_reject_password_fields(self):
         with self.assertRaises(ValueError):
             reject_secrets({"users": [{"password": "not stored"}]})
+
+    def test_ad_timestamp_can_be_datetime_or_filetime(self):
+        self.assertEqual(_filetime(NOW), "2026-09-24T00:00:00+00:00")
+        self.assertIsNotNone(_filetime(133555392000000000))
 
 
 if __name__ == "__main__":

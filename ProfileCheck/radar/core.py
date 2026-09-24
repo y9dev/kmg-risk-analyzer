@@ -1,10 +1,11 @@
+
 from __future__ import annotations
 
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from typing import Any
 
-# Pure, read-only risk rules. Inputs are normalized inventory, never credentials.
+# Read-only risk rules. Inputs are normalized inventory, never credentials.
 DEFAULTS = {
     "inactive_days": 90,
     "service_inactive_days": 90,
@@ -44,6 +45,7 @@ RULES = {
     "PASSWORD_SPRAY_SIGNAL": (55, "В журналах замечены массовые неуспешные входы по разным аккаунтам", "Проверьте события на контроллерах домена и источник попыток; эскалируйте в ИБ."),
     "BRUTE_FORCE_SIGNAL": (40, "В журналах замечено много неуспешных входов в одну учётную запись", "Проверьте источник, интервалы и успешные входы; эскалируйте в ИБ."),
 }
+
 
 def iso(value: Any) -> datetime | None:
     if not value:

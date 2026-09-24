@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 import json
@@ -8,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 # Inventory adapters. LDAP uses an encrypted connection and a read-only bind.
+
 FORBIDDEN_KEYS = {"password", "passwd", "pwd", "secret", "credential", "token", "unicodepwd", "ntpassword", "hash"}
 
 
@@ -32,6 +34,10 @@ def snapshot(path: Path) -> dict:
 
 
 def _filetime(value: Any) -> str | None:
+    if isinstance(value, datetime):
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=timezone.utc)
+        return value.astimezone(timezone.utc).isoformat()
     try:
         n = int(value)
         if n <= 0 or n >= 9223372036854775807:
@@ -42,7 +48,9 @@ def _filetime(value: Any) -> str | None:
 
 
 def _iso(value: Any) -> str | None:
-    return value.isoformat() if isinstance(value, datetime) else _filetime(value)
+    if isinstance(value, str):
+        return value
+    return _filetime(value)
 
 
 def ldap_inventory() -> dict:

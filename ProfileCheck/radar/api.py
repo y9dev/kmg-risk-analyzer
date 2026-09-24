@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 import csv
@@ -13,7 +14,8 @@ from urllib.parse import parse_qs, urlsplit
 from .core import DEFAULTS, analyze, validate_thresholds
 from .sources import ldap_inventory, snapshot
 
-# Small standard-library HTTP API: no runtime web framework required.
+# Small standard-library HTTP API
+
 ROOT = Path(__file__).resolve().parent.parent
 LOCK = threading.RLock()
 SCAN_LOCK = threading.Lock()
@@ -33,7 +35,7 @@ class Handler(BaseHTTPRequestHandler):
     server_version = "IdentityRadar/0.1"
 
     def log_message(self, format, *args):
-        # Do not write URLs, authorization headers or payloads to the access log.
+        # Do not write URLs, authorization headers or payloads to the access log
         pass
 
     def reply(self, status, body, content_type="application/json; charset=utf-8", filename=None):
@@ -65,14 +67,14 @@ class Handler(BaseHTTPRequestHandler):
         with LOCK:
             report = STATE["report"]
             if path == "/api/v1/config":
-                self.reply(200, {"thresholds": STATE["thresholds"], "sources": ["demo", "ldap"]})
+                self.reply(200, {"thresholds": STATE["thresholds"], "sources": ["ldap", "demo"], "default_source": "ldap"})
             elif path == "/api/v1/report":
-                self.reply(200 if report else 404, report or {"error": "Запустите анализ"})
+                self.reply(200 if report else 404, report or {"error": "Запусти анализ"})
             elif path == "/api/v1/summary":
-                self.reply(200 if report else 404, {k: report[k] for k in ("generated_at", "source", "security_score", "counts", "inventory", "categories", "coverage")} if report else {"error": "Запустите анализ"})
+                self.reply(200 if report else 404, {k: report[k] for k in ("generated_at", "source", "security_score", "counts", "inventory", "categories", "coverage")} if report else {"error": "Запусти анализ"})
             elif path == "/api/v1/findings":
                 if not report:
-                    self.reply(404, {"error": "Запустите анализ"})
+                    self.reply(404, {"error": "Запусти анализ"})
                     return
                 query = parse_qs(urlsplit(self.path).query)
                 items = report["findings"]
@@ -83,7 +85,7 @@ class Handler(BaseHTTPRequestHandler):
                 self.reply(200, {"items": STATE["history"]})
             elif path == "/api/v1/export.csv":
                 if not report:
-                    self.reply(404, {"error": "Запустите анализ"})
+                    self.reply(404, {"error": "Запусти анализ"})
                     return
                 buf = io.StringIO()
                 writer = csv.writer(buf)
@@ -111,7 +113,9 @@ class Handler(BaseHTTPRequestHandler):
                 AUDIT.info("config_updated")
                 self.reply(200, {"thresholds": updated})
             elif path == "/api/v1/scans":
-                source = data.get("source", "demo")
+                if set(data) - {"source"}:
+                    raise ValueError("Запрос запуска принимает только source; учётные записи читаются сервером из AD DS")
+                source = data.get("source", "ldap")
                 if source not in ("demo", "ldap"):
                     raise ValueError("Допустимые источники: demo, ldap")
                 if not SCAN_LOCK.acquire(blocking=False):
