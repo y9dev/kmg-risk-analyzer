@@ -138,13 +138,22 @@ class Handler(BaseHTTPRequestHandler):
             AUDIT.warning("invalid_request path=%s", path)
             self.reply(400, {"error": str(exc)})
         except Exception as exc:
-            AUDIT.error("scan_failed path=%s error_type=%s", path, type(exc).__name__)
-            self.reply(503, {"error": "Источник недоступен; подробности в локальном журнале"})
+            AUDIT.exception(
+                "scan_failed path=%s error_type=%s error=%s",
+                path,
+                type(exc).__name__,
+                str(exc),
+            )
+        self.reply(
+            503,
+            {"error": "Источник недоступен; подробности в локальном журнале"},
+        )
+
 
 
 def serve():
     configure_audit()
-    host = "127.0.0.1"
+    host = "0.0.0.0"
     port = int(os.environ.get("RADAR_PORT", "8000"))
     server = ThreadingHTTPServer((host, port), Handler)
     AUDIT.info("service_started host=%s port=%d", host, port)

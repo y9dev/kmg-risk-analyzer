@@ -1,0 +1,26 @@
+services:
+  identity-risk-analyzer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: identity-risk-analyzer
+
+    ports:
+      - "3000:3000"
+
+    environment:
+      RADAR_PORT: "3000"
+
+      RADAR_LDAP_HOST: ${RADAR_LDAP_HOST}
+      RADAR_LDAP_BASE_DN: ${RADAR_LDAP_BASE_DN}
+      RADAR_LDAP_BIND_DN: ${RADAR_LDAP_BIND_DN}
+      RADAR_LDAP_BIND_PASSWORD: ${RADAR_LDAP_BIND_PASSWORD}
+      # RADAR_LDAP_CA_FILE: ${RADAR_LDAP_CA_FILE}
+
+    restart: unless-stopped
+
+    # Необходим для чтения CA-файла внутри контейнера,
+    # если используется реальный AD.
+    # volumes:
+    #   - ./certs/ca.pem:/run/secrets/ldap-ca.pem:ro
