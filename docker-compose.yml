@@ -1,0 +1,60 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: certificate-radar-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: kmg1_db
+      POSTGRES_USER: radar
+      POSTGRES_PASSWORD: radar
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    networks:
+      - radar
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+
+    container_name: certificate-radar-backend
+    restart: unless-stopped
+
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+
+    depends_on:
+      postgres:
+        condition: service_started
+
+    networks:
+      - radar
+
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+
+    container_name: certificate-radar-dashboard
+    restart: unless-stopped
+
+    ports:
+      - "80:80"
+
+    depends_on:
+      - backend
+
+    networks:
+      - radar
+
+networks:
+  radar:
+    driver: bridge
+
+volumes:
+  postgres_data:

@@ -21,7 +21,7 @@ export function StatCard({
             c="dimmed"
             fw={800}
             tt="uppercase"
-            letterSpacing="0.08em"
+            style={{ letterSpacing: "0.08em" }}
           >
             {label}
           </Text>
